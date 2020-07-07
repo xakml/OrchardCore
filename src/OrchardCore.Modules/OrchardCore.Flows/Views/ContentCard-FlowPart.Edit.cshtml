@@ -2,17 +2,17 @@
 @inject OrchardCore.ContentManagement.Metadata.IContentDefinitionManager ContentDefinitionManager
 
 @{
-    var contentItem = (IContent)Model.ContentItem;
-    var contentTypeDisplayText = ContentDefinitionManager.GetTypeDefinition((string)Model.ContentItem.ContentType).DisplayName;
-    var contentItemDisplayText = contentItem.ContentItem.DisplayText;
+    var contentItem = Model.Value.Widget;
+    var contentTypeDisplayText = ContentDefinitionManager.GetTypeDefinition((string)contentItem.ContentType).DisplayName;
+    var contentItemDisplayText = contentItem.DisplayText;
     var widgetContentTypes = ContentDefinitionManager.ListTypeDefinitions().Where(t => t.GetSettings<ContentTypeSettings>().Stereotype == "Widget");
 
-    var editorId = "contentEditor_" + Model.PrefixValue;
+    var editorId = "contentEditor_" + Model.Value.PrefixValue;
 }
 
-<div class="widget widget-editor card my-1 @(Model.Inline != true ? "collapsed" : "")">
+<div class="widget widget-editor card my-1 @(Model.Value.Inline != true ? "collapsed" : "")">
     <div class="widget-editor-header card-header text-muted py-1 pl-3 pr-1">
-        @if (Model.CanMove != false)
+        @if (Model.Value.CanMove != false)
         {
             <div class="widget-editor-handle"><i class="fas fa-arrows-alt"></i></div>
         }
@@ -21,11 +21,12 @@
         <span data-content-type-display-text="@contentTypeDisplayText" class="widget-editor-header-text">@T["{0} {1}", contentItemDisplayText, contentTypeDisplayText]</span>
         <div class="btn-widget-metadata border border-info w-100">
             <div class="btn-group">
-                @if (Model.Footer != null)
+                @* @if (Model.Value.Footer != null)
                 {
-                    @await DisplayAsync(Model.Footer)
-                }
-                @if (Model.CanInsert != false)
+                    // TODO I broke this
+                    @await DisplayAsync(Model.Value.Footer)
+                } *@
+                @if (Model.Value.CanInsert != false)
                 {
                     <div class="btn-group">
                         <button class="toggleAll btn btn-secondary btn-sm" onclick="toggleWidgets(); return false;" title="@T["Toggle all widgets"]">
@@ -37,12 +38,12 @@
                             @foreach (var type in widgetContentTypes.OrderBy(w => w.DisplayName))
                             {
                                 <a class="dropdown-item insert-widget btn-sm"
-                                   data-target-id="@Model.TargetId"
-                                   data-prefixes-name="@Model.PrefixesName"
+                                   data-target-id="@Model.Value.TargetId"
+                                   data-prefixes-name="@Model.Value.PrefixesName"
                                    data-flowmetadata="true"
-                                   data-parent-content-type="@Model.ParentContentType"
-                                   data-part-name="@Model.CollectionPartName"
-                                   data-contenttypes-name="@Model.ContentTypesName"
+                                   data-parent-content-type="@Model.Value.ParentContentType"
+                                   data-part-name="@Model.Value.CollectionPartName"
+                                   data-contenttypes-name="@Model.Value.ContentTypesName"
                                    data-widget-type="@type.Name"
                                    href="javascript:;">@type.DisplayName</a>
                             }
@@ -52,7 +53,7 @@
             </div>
         </div>
         <div class="btn-group btn-group-sm float-right" role="group">
-            @if (Model.CanDelete != false)
+            @if (Model.Value.CanDelete != false)
             {
                 <button type="button" class="btn btn-danger widget-delete" data-title="@T["Delete"]" data-message="@T["Are you sure you want to remove this item?"]"><i class="fa fa-trash" aria-hidden="true"></i></button>
             }
@@ -60,9 +61,10 @@
     </div>
     <div class="widget-editor-body card-body px-2 py-1">
         <div class="w-100">
-            @if (Model.ContentEditor != null)
+            @if (Model.Value.ContentEditor != null)
             {
-                @await DisplayAsync(Model.ContentEditor)
+                @await DisplayAsync(Model.Value.ContentEditor)
+                
             }
         </div>
     </div>

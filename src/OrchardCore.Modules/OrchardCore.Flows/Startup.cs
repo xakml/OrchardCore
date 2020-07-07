@@ -7,8 +7,11 @@ using Microsoft.Extensions.Options;
 using OrchardCore.Admin;
 using OrchardCore.ContentManagement;
 using OrchardCore.ContentManagement.Display.ContentDisplay;
+using OrchardCore.ContentManagement.Display.Models;
 using OrchardCore.ContentTypes.Editors;
 using OrchardCore.Data.Migration;
+using OrchardCore.DisplayManagement;
+using OrchardCore.DisplayManagement.Handlers;
 using OrchardCore.Flows.Controllers;
 using OrchardCore.Flows.Drivers;
 using OrchardCore.Flows.Handlers;
@@ -58,6 +61,15 @@ namespace OrchardCore.Flows
             services.AddContentPart<FlowMetadata>();
 
             services.AddScoped<IDataMigration, Migrations>();
+
+            // this would only be registered once, in widgets and here, through tryaddscoped.
+            services.AddScoped<IDisplayManager<ContentCard>, DisplayManager<ContentCard>>();
+
+            // this would drive thumbnail shapes
+            services.AddScoped<IDisplayDriver<ContentCard>, FlowPartContentCardDisplayDriver>();
+            // This would only be registered once, through tryaddscoped
+            services.AddScoped<IDisplayDriver<ContentCard>, ContentCardDisplayDriver>();
+
         }
 
         public override void Configure(IApplicationBuilder app, IEndpointRouteBuilder routes, IServiceProvider serviceProvider)

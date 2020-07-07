@@ -3,8 +3,10 @@
 @{
     Model.Metadata.Alternates.Clear();
     Model.Metadata.Type = "ContentCard_Edit";
+    // I broke the alternates because I used a ShapeViewModel
+    // They should return correctly when it uses a ContentCardViewModel
+    Model.Metadata.Alternates.Add("ContentCard_Edit__FlowPart") ;
 }
-
 @await DisplayAsync(Model)
 
 @{

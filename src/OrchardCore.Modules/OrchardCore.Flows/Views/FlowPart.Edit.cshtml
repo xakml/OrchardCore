@@ -1,12 +1,14 @@
-@using OrchardCore.ContentManagement;
-@using OrchardCore.Flows.Models;
-@using OrchardCore.Flows.ViewModels;
-@using OrchardCore.Mvc.Utilities;
+@using OrchardCore.ContentManagement
+@using OrchardCore.ContentManagement.Display.Models
+@using OrchardCore.Flows.Models
+@using OrchardCore.Flows.ViewModels
+@using OrchardCore.Mvc.Utilities
 
 @model FlowPartEditViewModel
 
 @inject IContentManager ContentManager
 @inject OrchardCore.ContentManagement.Display.IContentItemDisplayManager ContentItemDisplayManager
+@inject OrchardCore.DisplayManagement.IDisplayManager<ContentCard> ContentCardDisplayManager
 
 @{
     var widgetContentTypes = Model.ContainedContentTypeDefinitions;
@@ -24,8 +26,43 @@
             var metadata = ((ContentItem)widget).As<OrchardCore.Flows.Models.FlowMetadata>();
             var colSize = (int)Math.Round((double)metadata.Size / 100.0 * 12);
 
+            var cardModel = new FlowPartContentCard
+            {
+                CollectionShape = Model,
+                //Shape Specific
+                CollectionShapeType = nameof(FlowPart),
+                Widget = widget,
+                BuildEditor = true,
+                ParentContentType = parentContentType,
+                CollectionPartName = partName,
+                //FlowPart Card Specific - For Frame
+                ColumnSize = colSize,
+                //Card Specific Properties
+                TargetId = widgetTemplatePlaceholderId,
+                // Values like this should be set in the FlowPart card constructor
+                Inline = false,
+                CanMove = true,
+                CanDelete = true,
+                //Input hidden
+                //Prefixes
+                PrefixValue = widget.ContentItemId,
+                HtmlFieldPrefix = htmlFieldPrefix,
+                PrefixesId = Html.IdFor(x => x.Prefixes),
+                PrefixesName = Html.NameFor(x => x.Prefixes),
+                //Content Types
+                ContentTypesId = Html.IdFor(x => x.ContentTypes),
+                ContentTypesName = Html.NameFor(x => x.ContentTypes)                
+            };
+            // TODO we don't really need the updater, but should
+            // also this might be better as BuildEditorAsync, but there are unlikely to be any UpdateEditorAsync
+            // so I think we try with BuildDisplayAsync first, and see where we end up.
+
+            dynamic contentCardShape = await ContentCardDisplayManager.BuildDisplayAsync(cardModel, null, "DetailAdmin");
+
+            @await DisplayAsync(contentCardShape)
+
             //Create a Card Shape
-            dynamic contentCard = await New.ContentCard(
+            @* dynamic contentCard = await New.ContentCard(
                 //For Updater
                 CollectionShape: Model,
                 //Shape Specific
@@ -51,7 +88,7 @@
                 ContentTypesId: Html.IdFor(x => x.ContentTypes),
                 ContentTypesName: Html.NameFor(x => x.ContentTypes)
             );
-            @await DisplayAsync(contentCard)
+            @await DisplayAsync(contentCard) *@
         }
     </div>
     <div class="btn-widget-add-below-wrapper w-100">

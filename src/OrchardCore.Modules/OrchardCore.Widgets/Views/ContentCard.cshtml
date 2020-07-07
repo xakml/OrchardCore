@@ -1,60 +1,83 @@
+@using OrchardCore.ContentManagement.Display.Models
+@model ShapeViewModel<ContentCard>
+@* TODO this should be a ContentCardViewModel with the properties that are relevent *@
 @inject OrchardCore.ContentManagement.Display.IContentItemDisplayManager ContentItemDisplayManager
 
 @{
+    // So what this shape does is
+    // - Adds the frame, adds itself to the frame (so wraps itself)
+    // - Builds the editor shape
+    // - Morphs itself to an editor type, to allow for alternates.
+
+
+    dynamic model = Model;
     //Set Model (Current Shape) as Child content of Outer Frame, Later this Model is used to render other shapes
     dynamic contentCardFrame = await New.ContentCard_Frame();
 
-    var contentItem = Model.ContentItem;
-    Model.ContentTypeValue = contentItem.ContentType;
+    var contentItem = Model.Value.Widget;
+    // TODO this should just be automatic
+    Model.Value.ContentType = contentItem.ContentType;
 
     //AJAX will not have CollectionShape.
-    var updater = Model.CollectionShape?.Updater ?? Model.Updater;
+    var updater = Model.Value.CollectionShape?.Updater ?? Model.Value.Updater;
 
-    if (Model.BuildEditor == true)
+    if (Model.Value.BuildEditor == true)
     {
         //Assign prefix
-        if (String.IsNullOrEmpty(Model.PrefixValue))
+        if (String.IsNullOrEmpty(Model.Value.PrefixValue))
         {
-            Model.PrefixValue = Guid.NewGuid().ToString("n");
+            Model.Value.PrefixValue = Guid.NewGuid().ToString("n");
         }
 
         //Build Editor for Content Item
         // AJAX request is new request and will not have CollectionShape.
-        var isNew = Model.CollectionShape == null ? true : false ;
-        dynamic contentItemEditor = await ContentItemDisplayManager.BuildEditorAsync(contentItem, updater, isNew, "", Model.PrefixValue);
+        var isNew = Model.Value.CollectionShape == null ? true : false ;
+        dynamic contentItemEditor = await ContentItemDisplayManager.BuildEditorAsync(contentItem, updater, isNew, "", Model.Value.PrefixValue);
 
         //We don't show Actions and Side bar the parent editor has its own buttons.
         contentItemEditor.Actions = null;
         contentItemEditor.Sidebar = null;
 
         //Move Content Footer to Card Footer, if any
-        Model.Footer = contentItemEditor.Footer;
+        // TODO may need to be a viewmodel property, if we can't find a better way to render these into the zones.
+        @* model.Footer = contentItemEditor.Footer; *@
         contentItemEditor.Footer = null;
 
-        Model.ContentEditor = contentItemEditor;
+        // Maybe this ContentEditor is actually a zone, (i.e. ContentEditor zone) and this is rendered into the zone?
+
+        model.Value.ContentEditor = contentItemEditor;
 
         //Change Shape type to Editor, this shape will be rendered from within Other Frame
-        Model.Metadata.Alternates.Clear();
-        Model.Metadata.Type = "ContentCard_Editor";
+        model.Metadata.Alternates.Clear();
+        // After doing this, it then gets alternated by shape providers to the flow part etc.
+        // It would be nice to not be doing that, and have the correct shape rendered by a driver.
 
-        contentCardFrame.ChildContent = Model;
+        // But equally it is really nice to have the BuildEditorAsync produced without having to do so in the
+        // ContentCard-WidgetsListPart.Edit shapes, as they are then just responsible for rendering their bit.
 
-        contentCardFrame.ColumnSize = Model.ColumnSize;
+        // So far the best idea is to move this ShapeViewModel<ContentCard> to a ContentCardViewModel.
+        model.Metadata.Type = "ContentCard_Editor";
+
+        contentCardFrame.ChildContent = model;
+
+        contentCardFrame.ColumnSize = Model.Value.ColumnSize;
     }
     else
     {
-        //Just Create Preview
-        dynamic contentDisplay = await ContentItemDisplayManager.BuildDisplayAsync(contentItem, updater, Model.DisplayType ?? "Detail");
-        Model.ChildContent = contentDisplay;
+        // TODO Disabled this short term, as I don't understand what it is for? It can't be a preview because it's not on the front end theme..
+
+        @* //Just Create Preview
+        dynamic contentDisplay = await ContentItemDisplayManager.BuildDisplayAsync(contentItem, updater, Model.Value.DisplayType ?? "Detail");
+        Model.Value.ChildContent = contentDisplay;
 
         //Hide the Delete
-        Model.CanDelete = false;
+        Model.Value.CanDelete = false;
 
         //Change Shape type to Preview, this shape will be rendered from within Other Frame
-        Model.Metadata.Alternates.Clear();
-        Model.Metadata.Type = "ContentCard_Preview";
+        Model.Value.Metadata.Alternates.Clear();
+        Model.Value.Metadata.Type = "ContentCard_Preview";
 
-        contentCardFrame.ContentPreview = Model;
+        contentCardFrame.ContentPreview = Model; *@
     }
     //Display Outer Frame
     @await DisplayAsync(contentCardFrame)
