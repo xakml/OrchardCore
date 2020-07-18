@@ -11,7 +11,8 @@ namespace OrchardCore.Themes.TheBlogTheme
             manifest
                 .DefineScript("TheBlogTheme-vendor-jQuery")
                 .SetUrl("~/TheBlogTheme/vendor/jquery/jquery.min.js", "~/TheBlogTheme/vendor/jquery/jquery.js")
-                .SetCdn("https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-3.5.1.js")
+                //.SetCdn("https://code.jquery.com/jquery-3.5.1.min.js", "https://code.jquery.com/jquery-3.5.1.js")
+                .SetCdn("https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js", "https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js")
                 .SetCdnIntegrity("sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2", "sha384-/LjQZzcpTzaYn7qWqRIWYC5l8FWEZ2bIHIz0D73Uzba4pShEcdLdZyZkI4Kv676E")
                 .SetVersion("3.5.1");
 
